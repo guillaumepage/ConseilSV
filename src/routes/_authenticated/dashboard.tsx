@@ -18,6 +18,7 @@ const resources = [
     desc: "Votre outil d'aide à la décision vaccinale. Accès complet à l'application.",
     icon: ShieldCheck,
     badge: "Application principale",
+    iconClass: "bg-gradient-brand",
   },
   {
     href: "https://www.inspq.qc.ca/sante-voyage/guide/pays",
@@ -25,6 +26,7 @@ const resources = [
     desc: "Guide d'intervention santé voyage : recommandations vaccinales par pays.",
     icon: Plane,
     badge: "Référence officielle",
+    iconClass: "bg-gradient-inspq",
   },
   {
     href: "https://msss.gouv.qc.ca/professionnels/vaccination/piq-vaccins/",
@@ -32,6 +34,7 @@ const resources = [
     desc: "Protocole d'immunisation du Québec, ministère de la Santé.",
     icon: BookOpen,
     badge: "MSSS",
+    iconClass: "bg-gradient-piq",
   },
 ] as const;
 
@@ -57,7 +60,7 @@ function Dashboard() {
             className="group flex flex-col rounded-2xl glass-card p-6 transition-all hover:-translate-y-1 hover:shadow-elegant"
           >
             <div className="flex items-start justify-between">
-              <div className="inline-flex size-12 items-center justify-center rounded-xl bg-gradient-brand text-primary-foreground shadow-glow">
+              <div className={`inline-flex size-12 items-center justify-center rounded-xl text-white shadow-glow ${r.iconClass}`}>
                 <r.icon className="size-6" />
               </div>
               <ExternalLink className="size-4 text-muted-foreground transition-colors group-hover:text-primary" />
