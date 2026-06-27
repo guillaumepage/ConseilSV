@@ -60,7 +60,7 @@ function Dashboard() {
             className="group flex flex-col rounded-2xl glass-card p-6 transition-all hover:-translate-y-1 hover:shadow-elegant"
           >
             <div className="flex items-start justify-between">
-              <div className="inline-flex size-12 items-center justify-center rounded-xl bg-gradient-brand text-primary-foreground shadow-glow">
+              <div className={`inline-flex size-12 items-center justify-center rounded-xl text-white shadow-glow ${r.iconClass}`}>
                 <r.icon className="size-6" />
               </div>
               <ExternalLink className="size-4 text-muted-foreground transition-colors group-hover:text-primary" />
