@@ -16,8 +16,8 @@ export const Route = createFileRoute("/auth")({
   validateSearch: searchSchema,
   head: () => ({
     meta: [
-      { title: "Connexion — VacciConseil" },
-      { name: "description", content: "Connectez-vous à VacciConseil ou créez votre compte." },
+      { title: "Connexion — ConseilSV" },
+      { name: "description", content: "Connectez-vous à ConseilSV ou créez votre compte." },
     ],
   }),
   component: AuthPage,
@@ -44,7 +44,7 @@ function AuthPage() {
       <div className="w-full max-w-md">
         <Link to="/" className="mb-6 flex items-center justify-center gap-2">
           <Logo className="h-12 w-12" />
-          <span className="text-xl font-bold text-gradient-brand">VacciConseil</span>
+          <span className="text-xl font-bold text-gradient-brand">ConseilSV</span>
         </Link>
 
         <div className="rounded-3xl glass-card p-8 shadow-elegant">

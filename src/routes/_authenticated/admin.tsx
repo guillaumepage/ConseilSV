@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export const Route = createFileRoute("/_authenticated/admin")({
-  head: () => ({ meta: [{ title: "Administration — VacciConseil" }] }),
+  head: () => ({ meta: [{ title: "Administration — ConseilSV" }] }),
   component: AdminPage,
 });
 

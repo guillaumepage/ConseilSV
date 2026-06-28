@@ -10,7 +10,7 @@ import { Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/profile")({
   head: () => ({
-    meta: [{ title: "Mon profil — VacciConseil" }],
+    meta: [{ title: "Mon profil — ConseilSV" }],
   }),
   component: ProfilePage,
 });

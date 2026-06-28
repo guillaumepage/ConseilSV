@@ -12,7 +12,7 @@ import { Loader2 } from "lucide-react";
 export const Route = createFileRoute("/forgot-password")({
   head: () => ({
     meta: [
-      { title: "Mot de passe oublié — VacciConseil" },
+      { title: "Mot de passe oublié — ConseilSV" },
       { name: "description", content: "Demandez une réinitialisation de votre mot de passe." },
     ],
   }),
@@ -48,7 +48,7 @@ function ForgotPassword() {
       <div className="w-full max-w-md">
         <Link to="/" className="mb-6 flex items-center justify-center gap-2">
           <Logo className="h-12 w-12" />
-          <span className="text-xl font-bold text-gradient-brand">VacciConseil</span>
+          <span className="text-xl font-bold text-gradient-brand">ConseilSV</span>
         </Link>
         <div className="rounded-3xl glass-card p-8 shadow-elegant">
           <h1 className="text-2xl font-bold">Mot de passe oublié</h1>
