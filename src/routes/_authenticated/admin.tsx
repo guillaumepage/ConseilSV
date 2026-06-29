@@ -3,8 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
-import { Edit3, Loader2, KeyRound, ShieldAlert } from "lucide-react";
-import { listUsers, sendPasswordReset, setUserAdminRole, updateUserProfileByAdmin } from "@/lib/admin.functions";
+import { Check, Edit3, Loader2, KeyRound, ShieldAlert, X } from "lucide-react";
+import { listUsers, sendPasswordReset, setUserAdminRole, setUserApproval, updateUserProfileByAdmin } from "@/lib/admin.functions";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -24,6 +24,7 @@ function AdminPage() {
   const reset = useServerFn(sendPasswordReset);
   const updateProfile = useServerFn(updateUserProfileByAdmin);
   const updateRole = useServerFn(setUserAdminRole);
+  const updateApproval = useServerFn(setUserApproval);
   const [pending, setPending] = useState<string | null>(null);
   const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
 
@@ -37,6 +38,19 @@ function AdminPage() {
     try {
       await reset({ data: { email, redirectTo: `${window.location.origin}/reset-password` } });
       toast.success(`Lien de réinitialisation envoyé à ${email}`);
+    } catch (e: any) {
+      toast.error(e.message ?? "Erreur");
+    } finally {
+      setPending(null);
+    }
+  }
+
+  async function onToggleApproval(u: AdminUser) {
+    setPending(u.id);
+    try {
+      await updateApproval({ data: { userId: u.id, approved: !u.approved } });
+      toast.success(u.approved ? "Approbation retirée" : "Compte approuvé");
+      await refetch();
     } catch (e: any) {
       toast.error(e.message ?? "Erreur");
     } finally {
@@ -109,6 +123,7 @@ function AdminPage() {
                 <TableHead>Licence</TableHead>
                 <TableHead>Rôle</TableHead>
                 <TableHead>Abonnement</TableHead>
+                <TableHead>Statut</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -117,7 +132,7 @@ function AdminPage() {
                 <TableRow key={u.id}>
                   <TableCell className="font-medium">{u.email}</TableCell>
                   <TableCell>{u.full_name ?? "—"}</TableCell>
-                  <TableCell>{u.profession ?? "—"}</TableCell>
+                  <TableCell>{u.profession ? PROFESSION_LABELS[u.profession] : "—"}</TableCell>
                   <TableCell>{u.license_number ?? "—"}</TableCell>
                   <TableCell>
                     {u.roles.includes("admin") ? (
@@ -128,11 +143,34 @@ function AdminPage() {
                   </TableCell>
                   <TableCell>
                     <Badge variant={u.subscription_tier === "pro" ? "default" : "outline"}>
-                      {u.subscription_tier}
+                      {SUBSCRIPTION_LABELS[u.subscription_tier]}
                     </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {u.approved ? (
+                      <Badge className="bg-emerald-600 text-white hover:bg-emerald-600">Approuvé</Badge>
+                    ) : (
+                      <Badge variant="outline" className="border-amber-500 text-amber-700">En attente</Badge>
+                    )}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
+                      <Button
+                        size="sm"
+                        variant={u.approved ? "outline" : "default"}
+                        className={!u.approved ? "bg-gradient-brand text-primary-foreground hover:opacity-90" : ""}
+                        disabled={pending === u.id}
+                        onClick={() => onToggleApproval(u)}
+                      >
+                        {pending === u.id ? (
+                          <Loader2 className="size-3.5 animate-spin" />
+                        ) : u.approved ? (
+                          <X className="size-3.5" />
+                        ) : (
+                          <Check className="size-3.5" />
+                        )}
+                        {u.approved ? "Révoquer" : "Approuver"}
+                      </Button>
                       <Button size="sm" variant="ghost" onClick={() => setEditingUser(u)}>
                         <Edit3 className="size-3.5" />
                         Modifier
@@ -156,7 +194,7 @@ function AdminPage() {
               ))}
               {data && data.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="py-10 text-center text-muted-foreground">
+                  <TableCell colSpan={8} className="py-10 text-center text-muted-foreground">
                     Aucun usager pour le moment.
                   </TableCell>
                 </TableRow>
@@ -184,8 +222,22 @@ type AdminUser = {
   profession: Profession | null;
   license_number: string | null;
   subscription_tier: SubscriptionTier;
+  approved: boolean;
   created_at: string;
   roles: string[];
+};
+
+const PROFESSION_LABELS: Record<Profession, string> = {
+  medecin: "Médecin",
+  pharmacien: "Pharmacien(ne)",
+  infirmiere: "Infirmier(ère)",
+  etudiant: "Étudiant(e)",
+  autre: "Autre",
+};
+
+const SUBSCRIPTION_LABELS: Record<SubscriptionTier, string> = {
+  free: "Gratuit",
+  pro: "Payant",
 };
 type AdminUserForm = {
   id: string;
@@ -281,8 +333,8 @@ function EditUserDialog({
                 <Select value={subscriptionTier} onValueChange={(v) => setSubscriptionTier(v as SubscriptionTier)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="free">free</SelectItem>
-                    <SelectItem value="pro">pro</SelectItem>
+                    <SelectItem value="free">Gratuit</SelectItem>
+                    <SelectItem value="pro">Payant</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
