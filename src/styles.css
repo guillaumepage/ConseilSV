@@ -47,9 +47,8 @@
   --inspq-coral: #e8825a;
   --piq-navy: #1f3b6e;
   --piq-gold: #f5c518;
-  --rx-charcoal: #303235;
-  --rx-lime: #7fc51d;
-  --rx-teal: #27a98d;
+  --rx-lime: #8bd12a;
+  --rx-teal: #52b596;
 
   --background: oklch(0.99 0.005 260);
   --foreground: oklch(0.18 0.04 265);
@@ -83,9 +82,9 @@
   /* Gradients & shadows */
   --gradient-brand: linear-gradient(135deg, var(--brand-blue) 0%, var(--brand-violet) 100%);
   --gradient-vaccicheck: linear-gradient(135deg, #075ab5 0%, #00a9c5 48%, #31b943 100%);
-  --gradient-inspq: linear-gradient(135deg, var(--inspq-slate) 0%, var(--inspq-slate) 48%, var(--inspq-coral) 100%);
-  --gradient-piq: linear-gradient(135deg, var(--piq-navy) 0%, var(--piq-navy) 55%, var(--piq-gold) 100%);
-  --gradient-rx: linear-gradient(135deg, var(--rx-charcoal) 0%, var(--rx-lime) 52%, var(--rx-teal) 100%);
+  --gradient-inspq: linear-gradient(135deg, var(--inspq-slate) 0%, var(--inspq-slate) 38%, var(--inspq-coral) 100%);
+  --gradient-piq: linear-gradient(135deg, var(--piq-navy) 0%, var(--piq-navy) 44%, var(--piq-gold) 100%);
+  --gradient-rx: linear-gradient(135deg, var(--rx-lime) 0%, var(--rx-teal) 100%);
   --gradient-brand-soft: linear-gradient(135deg, oklch(0.95 0.05 265) 0%, oklch(0.94 0.07 295) 100%);
   --gradient-radial: radial-gradient(circle at top right, oklch(0.85 0.15 280 / 0.35), transparent 60%),
                      radial-gradient(circle at bottom left, oklch(0.85 0.15 250 / 0.3), transparent 55%);
@@ -131,7 +130,7 @@
   }
   h1, h2, h3, h4 {
     font-family: var(--font-display);
-    letter-spacing: -0.02em;
+    letter-spacing: 0;
   }
 }
 
