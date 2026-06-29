@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       profiles: {
         Row: {
+          approved: boolean
           created_at: string
           email: string
           full_name: string | null
@@ -26,6 +27,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          approved?: boolean
           created_at?: string
           email: string
           full_name?: string | null
@@ -36,6 +38,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          approved?: boolean
           created_at?: string
           email?: string
           full_name?: string | null
