@@ -85,6 +85,7 @@ export const updateUserProfileByAdmin = createServerFn({ method: "POST" })
     z
       .object({
         userId: z.string().uuid(),
+        email: z.string().trim().email().max(255),
         fullName: z.string().trim().max(100).nullable(),
         profession: professionSchema.nullable(),
         licenseNumber: z.string().trim().max(50).nullable(),
@@ -95,9 +96,17 @@ export const updateUserProfileByAdmin = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context.userId);
     const supabaseAdmin = await getAdminClient();
+
+    const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(data.userId, {
+      email: data.email,
+      email_confirm: true,
+    } as never);
+    if (authError) throw new Error(authError.message);
+
     const { error } = await supabaseAdmin
       .from("profiles")
       .update({
+        email: data.email,
         full_name: data.fullName || null,
         profession: data.profession,
         license_number: data.licenseNumber || null,
