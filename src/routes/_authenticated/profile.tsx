@@ -32,6 +32,7 @@ function ProfilePage() {
   const [fullName, setFullName] = useState("");
   const [profession, setProfession] = useState<Profession | "">("");
   const [licenseNumber, setLicenseNumber] = useState("");
+  const [passwordSaving, setPasswordSaving] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -71,6 +72,30 @@ function ProfilePage() {
       return;
     }
     toast.success("Profil mis à jour");
+  }
+
+  async function onPasswordSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const password = String(fd.get("password") ?? "");
+    const confirm = String(fd.get("confirm") ?? "");
+    if (password.length < 6) {
+      toast.error("Minimum 6 caractères");
+      return;
+    }
+    if (password !== confirm) {
+      toast.error("Les mots de passe ne correspondent pas");
+      return;
+    }
+    setPasswordSaving(true);
+    const { error } = await supabase.auth.updateUser({ password });
+    setPasswordSaving(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    e.currentTarget.reset();
+    toast.success("Mot de passe mis à jour");
   }
 
   return (
@@ -126,6 +151,23 @@ function ProfilePage() {
             </Button>
           </form>
         )}
+      </div>
+
+      <div className="mt-6 rounded-2xl glass-card p-6 shadow-soft">
+        <h2 className="text-xl font-bold">Mot de passe</h2>
+        <form onSubmit={onPasswordSubmit} className="mt-5 space-y-5">
+          <div className="space-y-2">
+            <Label htmlFor="password">Nouveau mot de passe</Label>
+            <Input id="password" name="password" type="password" required autoComplete="new-password" />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="confirm">Confirmer le mot de passe</Label>
+            <Input id="confirm" name="confirm" type="password" required autoComplete="new-password" />
+          </div>
+          <Button type="submit" variant="outline" disabled={passwordSaving}>
+            {passwordSaving && <Loader2 className="size-4 animate-spin" />} Modifier le mot de passe
+          </Button>
+        </form>
       </div>
     </main>
   );
