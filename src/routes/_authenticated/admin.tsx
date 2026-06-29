@@ -333,8 +333,8 @@ function EditUserDialog({
                 <Select value={subscriptionTier} onValueChange={(v) => setSubscriptionTier(v as SubscriptionTier)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="free">free</SelectItem>
-                    <SelectItem value="pro">pro</SelectItem>
+                    <SelectItem value="free">Gratuit</SelectItem>
+                    <SelectItem value="pro">Payant</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
