@@ -189,6 +189,7 @@ type AdminUser = {
 };
 type AdminUserForm = {
   id: string;
+  email: string;
   full_name: string;
   profession: Profession | "";
   license_number: string;
@@ -216,6 +217,7 @@ function EditUserDialog({
   onSave: (input: AdminUserForm) => void;
 }) {
   const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
   const [profession, setProfession] = useState<Profession | "">("");
   const [licenseNumber, setLicenseNumber] = useState("");
   const [subscriptionTier, setSubscriptionTier] = useState<SubscriptionTier>("free");
@@ -223,6 +225,7 @@ function EditUserDialog({
 
   useEffect(() => {
     if (!user) return;
+    setEmail(user.email);
     setFullName(user.full_name ?? "");
     setProfession(user.profession ?? "");
     setLicenseNumber(user.license_number ?? "");
@@ -235,6 +238,7 @@ function EditUserDialog({
     if (!user) return;
     onSave({
       id: user.id,
+      email,
       full_name: fullName,
       profession,
       license_number: licenseNumber,
