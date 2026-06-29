@@ -3,11 +3,16 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { useState } from "react";
-import { Loader2, KeyRound, ShieldAlert } from "lucide-react";
-import { listUsers, sendPasswordReset } from "@/lib/admin.functions";
+import { Edit3, Loader2, KeyRound, ShieldAlert } from "lucide-react";
+import { listUsers, sendPasswordReset, setUserAdminRole, updateUserProfileByAdmin } from "@/lib/admin.functions";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({ meta: [{ title: "Administration — ConseilSV" }] }),
@@ -17,7 +22,10 @@ export const Route = createFileRoute("/_authenticated/admin")({
 function AdminPage() {
   const fetchUsers = useServerFn(listUsers);
   const reset = useServerFn(sendPasswordReset);
+  const updateProfile = useServerFn(updateUserProfileByAdmin);
+  const updateRole = useServerFn(setUserAdminRole);
   const [pending, setPending] = useState<string | null>(null);
+  const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["admin-users"],
@@ -27,8 +35,31 @@ function AdminPage() {
   async function onReset(email: string) {
     setPending(email);
     try {
-      await reset({ data: { email } });
+      await reset({ data: { email, redirectTo: `${window.location.origin}/reset-password` } });
       toast.success(`Lien de réinitialisation envoyé à ${email}`);
+    } catch (e: any) {
+      toast.error(e.message ?? "Erreur");
+    } finally {
+      setPending(null);
+    }
+  }
+
+  async function onSaveUser(input: AdminUserForm) {
+    setPending(input.id);
+    try {
+      await updateProfile({
+        data: {
+          userId: input.id,
+          fullName: input.full_name.trim() || null,
+          profession: input.profession || null,
+          licenseNumber: input.license_number.trim() || null,
+          subscriptionTier: input.subscription_tier,
+        },
+      });
+      await updateRole({ data: { userId: input.id, isAdmin: input.isAdmin } });
+      toast.success("Compte mis à jour");
+      setEditingUser(null);
+      await refetch();
     } catch (e: any) {
       toast.error(e.message ?? "Erreur");
     } finally {
@@ -100,19 +131,25 @@ function AdminPage() {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      disabled={pending === u.email}
-                      onClick={() => onReset(u.email)}
-                    >
-                      {pending === u.email ? (
-                        <Loader2 className="size-3.5 animate-spin" />
-                      ) : (
-                        <KeyRound className="size-3.5" />
-                      )}
-                      Réinitialiser
-                    </Button>
+                    <div className="flex justify-end gap-2">
+                      <Button size="sm" variant="ghost" onClick={() => setEditingUser(u)}>
+                        <Edit3 className="size-3.5" />
+                        Modifier
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={pending === u.email}
+                        onClick={() => onReset(u.email)}
+                      >
+                        {pending === u.email ? (
+                          <Loader2 className="size-3.5 animate-spin" />
+                        ) : (
+                          <KeyRound className="size-3.5" />
+                        )}
+                        Réinitialiser
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -127,6 +164,137 @@ function AdminPage() {
           </Table>
         )}
       </div>
+      <EditUserDialog
+        user={editingUser}
+        saving={pending === editingUser?.id}
+        onClose={() => setEditingUser(null)}
+        onSave={onSaveUser}
+      />
     </main>
   );
 }
+
+type AdminUser = NonNullable<Awaited<ReturnType<ReturnType<typeof useServerFn<typeof listUsers>>>>>[number];
+type Profession = "medecin" | "pharmacien" | "infirmiere" | "etudiant" | "autre";
+type SubscriptionTier = "free" | "pro";
+type AdminUserForm = {
+  id: string;
+  full_name: string;
+  profession: Profession | "";
+  license_number: string;
+  subscription_tier: SubscriptionTier;
+  isAdmin: boolean;
+};
+
+const PROFESSIONS: { value: Profession; label: string }[] = [
+  { value: "medecin", label: "Médecin" },
+  { value: "pharmacien", label: "Pharmacien(ne)" },
+  { value: "infirmiere", label: "Infirmier(ère)" },
+  { value: "etudiant", label: "Étudiant(e)" },
+  { value: "autre", label: "Autre" },
+];
+
+function EditUserDialog({
+  user,
+  saving,
+  onClose,
+  onSave,
+}: {
+  user: AdminUser | null;
+  saving: boolean;
+  onClose: () => void;
+  onSave: (input: AdminUserForm) => void;
+}) {
+  const [fullName, setFullName] = useState("");
+  const [profession, setProfession] = useState<Profession | "">("");
+  const [licenseNumber, setLicenseNumber] = useState("");
+  const [subscriptionTier, setSubscriptionTier] = useState<SubscriptionTier>("free");
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  if (user && user.id !== currentUserId) {
+    currentUserId = user.id;
+    setFullName(user.full_name ?? "");
+    setProfession((user.profession as Profession | null) ?? "");
+    setLicenseNumber(user.license_number ?? "");
+    setSubscriptionTier((user.subscription_tier as SubscriptionTier | null) ?? "free");
+    setIsAdmin(user.roles.includes("admin"));
+  }
+
+  function submit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!user) return;
+    onSave({
+      id: user.id,
+      full_name: fullName,
+      profession,
+      license_number: licenseNumber,
+      subscription_tier: subscriptionTier,
+      isAdmin,
+    });
+  }
+
+  return (
+    <Dialog open={!!user} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Modifier le compte</DialogTitle>
+          <DialogDescription>Les mots de passe restent confidentiels et ne sont pas modifiables ici.</DialogDescription>
+        </DialogHeader>
+        {user && (
+          <form onSubmit={submit} className="space-y-4">
+            <div className="space-y-2">
+              <Label>Courriel</Label>
+              <Input value={user.email} disabled />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="admin-full-name">Nom complet</Label>
+              <Input id="admin-full-name" value={fullName} onChange={(e) => setFullName(e.target.value)} maxLength={100} />
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Profession</Label>
+                <Select value={profession} onValueChange={(v) => setProfession(v as Profession)}>
+                  <SelectTrigger><SelectValue placeholder="Sélectionnez..." /></SelectTrigger>
+                  <SelectContent>
+                    {PROFESSIONS.map((p) => (
+                      <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Abonnement</Label>
+                <Select value={subscriptionTier} onValueChange={(v) => setSubscriptionTier(v as SubscriptionTier)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="free">free</SelectItem>
+                    <SelectItem value="pro">pro</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="admin-license">Numéro de licence professionnelle</Label>
+              <Input id="admin-license" value={licenseNumber} onChange={(e) => setLicenseNumber(e.target.value)} maxLength={50} />
+            </div>
+            <div className="flex items-center justify-between rounded-xl border border-border/70 p-3">
+              <div>
+                <Label>Rôle administrateur</Label>
+                <p className="text-xs text-muted-foreground">Donne accès à l’onglet Admin.</p>
+              </div>
+              <Switch checked={isAdmin} onCheckedChange={setIsAdmin} />
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button type="button" variant="outline" onClick={onClose}>Annuler</Button>
+              <Button type="submit" className="bg-gradient-brand text-primary-foreground hover:opacity-90" disabled={saving}>
+                {saving && <Loader2 className="size-4 animate-spin" />} Enregistrer
+              </Button>
+            </div>
+          </form>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+let currentUserId = "";
