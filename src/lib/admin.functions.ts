@@ -19,6 +19,9 @@ async function assertAdmin(userId: string) {
   if (!data) throw new Error("Forbidden");
 }
 
+const professionSchema = z.enum(["medecin", "pharmacien", "infirmiere", "etudiant", "autre"]);
+const subscriptionSchema = z.enum(["free", "pro"]);
+
 export const getMyAdminStatus = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
@@ -58,14 +61,75 @@ export const listUsers = createServerFn({ method: "GET" })
 
 export const sendPasswordReset = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { email: string }) => z.object({ email: z.string().email() }).parse(data))
+  .inputValidator((data: { email: string; redirectTo: string }) =>
+    z
+      .object({
+        email: z.string().email(),
+        redirectTo: z.string().url(),
+      })
+      .parse(data),
+  )
   .handler(async ({ data, context }) => {
     await assertAdmin(context.userId);
     const supabaseAdmin = await getAdminClient();
-    const { error } = await supabaseAdmin.auth.admin.generateLink({
-      type: "recovery",
-      email: data.email,
+    const { error } = await supabaseAdmin.auth.resetPasswordForEmail(data.email, {
+      redirectTo: data.redirectTo,
     });
     if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const updateUserProfileByAdmin = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        userId: z.string().uuid(),
+        fullName: z.string().trim().max(100).nullable(),
+        profession: professionSchema.nullable(),
+        licenseNumber: z.string().trim().max(50).nullable(),
+        subscriptionTier: subscriptionSchema,
+      })
+      .parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.userId);
+    const supabaseAdmin = await getAdminClient();
+    const { error } = await supabaseAdmin
+      .from("profiles")
+      .update({
+        full_name: data.fullName || null,
+        profession: data.profession,
+        license_number: data.licenseNumber || null,
+        subscription_tier: data.subscriptionTier,
+      })
+      .eq("id", data.userId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const setUserAdminRole = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) =>
+    z.object({ userId: z.string().uuid(), isAdmin: z.boolean() }).parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.userId);
+    if (data.userId === context.userId && !data.isAdmin) throw new Error("Vous ne pouvez pas retirer votre propre accès admin.");
+
+    const supabaseAdmin = await getAdminClient();
+    if (data.isAdmin) {
+      const { error } = await supabaseAdmin
+        .from("user_roles")
+        .upsert({ user_id: data.userId, role: "admin" }, { onConflict: "user_id,role" });
+      if (error) throw new Error(error.message);
+    } else {
+      const { error } = await supabaseAdmin
+        .from("user_roles")
+        .delete()
+        .eq("user_id", data.userId)
+        .eq("role", "admin");
+      if (error) throw new Error(error.message);
+    }
     return { ok: true };
   });
