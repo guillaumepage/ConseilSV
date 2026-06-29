@@ -118,6 +118,11 @@ export const setUserAdminRole = createServerFn({ method: "POST" })
     if (data.userId === context.userId && !data.isAdmin) throw new Error("Vous ne pouvez pas retirer votre propre accès admin.");
 
     const supabaseAdmin = await getAdminClient();
+    const { error: userRoleError } = await supabaseAdmin
+      .from("user_roles")
+      .upsert({ user_id: data.userId, role: "user" }, { onConflict: "user_id,role" });
+    if (userRoleError) throw new Error(userRoleError.message);
+
     if (data.isAdmin) {
       const { error } = await supabaseAdmin
         .from("user_roles")
