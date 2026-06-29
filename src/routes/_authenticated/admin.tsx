@@ -50,6 +50,7 @@ function AdminPage() {
       await updateProfile({
         data: {
           userId: input.id,
+          email: input.email.trim(),
           fullName: input.full_name.trim() || null,
           profession: input.profession || null,
           licenseNumber: input.license_number.trim() || null,
@@ -252,8 +253,8 @@ function EditUserDialog({
         {user && (
           <form onSubmit={submit} className="space-y-4">
             <div className="space-y-2">
-              <Label>Courriel</Label>
-              <Input value={user.email} disabled />
+              <Label htmlFor="admin-email">Courriel</Label>
+              <Input id="admin-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={255} required />
             </div>
             <div className="space-y-2">
               <Label htmlFor="admin-full-name">Nom complet</Label>
