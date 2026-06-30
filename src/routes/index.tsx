@@ -1,9 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Plane, BookOpen, ArrowRight, FileText, ShieldCheck, Stethoscope, GitBranch } from "lucide-react";
+import { Plane, BookOpen, ArrowRight, FileText, ShieldCheck, Stethoscope, GitBranch, Syringe, Pill, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
-import vaccicheckLogo from "@/assets/vaccicheck-logo.png.asset.json";
-import rxLogo from "@/assets/rxvigilance-logo.png.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
