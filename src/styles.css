@@ -49,6 +49,12 @@
   --piq-gold: #f5c518;
   --rx-lime: #8bd12a;
   --rx-teal: #52b596;
+  --registre-light: #3a7fbf;
+  --registre-deep: #0033a0;
+  --appsq-slate: #5d6975;
+  --appsq-turquoise: #5cc4c4;
+  --abcpq-blue: #0a78d6;
+  --abcpq-coral: #ed6b6b;
 
   --background: oklch(0.99 0.005 260);
   --foreground: oklch(0.18 0.04 265);
@@ -85,6 +91,9 @@
   --gradient-inspq: linear-gradient(135deg, var(--inspq-slate) 0%, var(--inspq-slate) 38%, var(--inspq-coral) 100%);
   --gradient-piq: linear-gradient(135deg, var(--piq-navy) 0%, var(--piq-navy) 44%, var(--piq-gold) 100%);
   --gradient-rx: linear-gradient(135deg, var(--rx-lime) 0%, var(--rx-teal) 100%);
+  --gradient-registre: linear-gradient(135deg, var(--registre-light) 0%, var(--registre-deep) 100%);
+  --gradient-appsq: linear-gradient(135deg, var(--appsq-slate) 0%, var(--appsq-slate) 45%, var(--appsq-turquoise) 100%);
+  --gradient-abcpq: linear-gradient(135deg, var(--abcpq-blue) 0%, var(--abcpq-coral) 100%);
   --gradient-brand-soft: linear-gradient(135deg, oklch(0.95 0.05 265) 0%, oklch(0.94 0.07 295) 100%);
   --gradient-radial: radial-gradient(circle at top right, oklch(0.85 0.15 280 / 0.35), transparent 60%),
                      radial-gradient(circle at bottom left, oklch(0.85 0.15 250 / 0.3), transparent 55%);
@@ -166,6 +175,15 @@
 }
 @utility bg-gradient-vaccicheck {
   background-image: var(--gradient-vaccicheck);
+}
+@utility bg-gradient-registre {
+  background-image: var(--gradient-registre);
+}
+@utility bg-gradient-appsq {
+  background-image: var(--gradient-appsq);
+}
+@utility bg-gradient-abcpq {
+  background-image: var(--gradient-abcpq);
 }
 @utility glass-card {
   background-color: color-mix(in oklab, var(--card) 80%, transparent);
