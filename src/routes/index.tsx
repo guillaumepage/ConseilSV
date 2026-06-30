@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Plane, BookOpen, ArrowRight, FileText } from "lucide-react";
+import { Plane, BookOpen, ArrowRight, FileText, ShieldCheck, Stethoscope, GitBranch } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
 import vaccicheckLogo from "@/assets/vaccicheck-logo.png.asset.json";
@@ -49,6 +49,24 @@ const publicResources = [
     text: "Formulaires PDF de conseils aux voyageurs regroupés dans le portail.",
     logo: rxLogo.url,
     iconClass: "bg-gradient-rx",
+  },
+  {
+    title: "Registre de vaccination",
+    text: "Accès direct au Registre de vaccination du Québec.",
+    icon: ShieldCheck,
+    iconClass: "bg-gradient-registre",
+  },
+  {
+    title: "APPSQ",
+    text: "Documents cliniques de l'APPSQ sur la santé voyage.",
+    icon: Stethoscope,
+    iconClass: "bg-gradient-appsq",
+  },
+  {
+    title: "ABCPQ",
+    text: "Algorithmes d'aide à la décision de l'ABCPQ.",
+    icon: GitBranch,
+    iconClass: "bg-gradient-abcpq",
   },
 ] as const;
 
