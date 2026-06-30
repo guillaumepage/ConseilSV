@@ -18,6 +18,11 @@ export function AppHeader() {
     let active = true;
 
     async function loadAdminStatus() {
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) {
+        if (active) setIsAdmin(false);
+        return;
+      }
       try {
         const status = await fetchAdminStatus();
         if (active) setIsAdmin(status.isAdmin);
@@ -28,8 +33,14 @@ export function AppHeader() {
 
     loadAdminStatus();
 
-    const { data: sub } = supabase.auth.onAuthStateChange(() => {
-      loadAdminStatus();
+    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_OUT") {
+        if (active) setIsAdmin(false);
+        return;
+      }
+      if (event === "SIGNED_IN" || event === "USER_UPDATED") {
+        loadAdminStatus();
+      }
     });
 
     return () => {
@@ -37,6 +48,7 @@ export function AppHeader() {
       sub.subscription.unsubscribe();
     };
   }, [fetchAdminStatus]);
+
 
   async function signOut() {
     await queryClient.cancelQueries();
