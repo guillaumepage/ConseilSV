@@ -188,6 +188,9 @@
 @utility bg-gradient-abcpq {
   background-image: var(--gradient-abcpq);
 }
+@utility bg-gradient-cdc {
+  background-image: var(--gradient-cdc);
+}
 @utility glass-card {
   background-color: color-mix(in oklab, var(--card) 80%, transparent);
   backdrop-filter: blur(12px);
