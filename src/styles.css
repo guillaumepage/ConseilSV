@@ -96,6 +96,7 @@
   --gradient-registre: linear-gradient(135deg, var(--registre-light) 0%, var(--registre-deep) 100%);
   --gradient-appsq: linear-gradient(135deg, var(--appsq-slate) 0%, var(--appsq-slate) 45%, var(--appsq-turquoise) 100%);
   --gradient-abcpq: linear-gradient(135deg, var(--abcpq-blue) 0%, var(--abcpq-coral) 100%);
+  --gradient-cdc: linear-gradient(135deg, var(--cdc-blue) 0%, var(--cdc-teal) 100%);
   --gradient-brand-soft: linear-gradient(135deg, oklch(0.95 0.05 265) 0%, oklch(0.94 0.07 295) 100%);
   --gradient-radial: radial-gradient(circle at top right, oklch(0.85 0.15 280 / 0.35), transparent 60%),
                      radial-gradient(circle at bottom left, oklch(0.85 0.15 250 / 0.3), transparent 55%);
