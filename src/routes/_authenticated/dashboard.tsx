@@ -42,6 +42,11 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
   component: Dashboard,
 });
 
+// Assets are hosted on Lovable CDN; prepend absolute host so PDFs/PNGs resolve
+// when the site is served from Netlify (or any non-Lovable host).
+const ASSET_CDN = "https://conseilsv.lovable.app";
+const cdn = (path: string) => (path.startsWith("http") ? path : `${ASSET_CDN}${path}`);
+
 type Resource =
   | { kind: "external"; href: string; title: string; desc: string; badge: string; iconClass: string; logo?: string; icon?: React.ComponentType<{ className?: string }> }
   | { kind: "toggle"; toggle: "rx" | "appsq" | "abcpq"; title: string; desc: string; badge: string; iconClass: string; logo?: string; icon?: React.ComponentType<{ className?: string }> };
