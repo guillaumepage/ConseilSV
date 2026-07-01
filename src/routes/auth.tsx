@@ -6,9 +6,19 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Logo } from "@/components/Logo";
 import { Loader2 } from "lucide-react";
+
+type Profession = "medecin" | "pharmacien" | "infirmiere" | "etudiant" | "autre";
+const PROFESSIONS: { value: Profession; label: string }[] = [
+  { value: "medecin", label: "Médecin" },
+  { value: "pharmacien", label: "Pharmacien(ne)" },
+  { value: "infirmiere", label: "Infirmier(ère)" },
+  { value: "etudiant", label: "Étudiant(e)" },
+  { value: "autre", label: "Autre" },
+];
 
 const searchSchema = z.object({ mode: z.enum(["signin", "signup"]).optional() });
 
@@ -120,6 +130,7 @@ function SignInForm() {
 
 function SignUpForm({ onDone }: { onDone: () => void }) {
   const [loading, setLoading] = useState(false);
+  const [profession, setProfession] = useState<Profession | "">("");
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -133,19 +144,42 @@ function SignUpForm({ onDone }: { onDone: () => void }) {
       return;
     }
     const fullName = String(fd.get("full_name") ?? "").trim();
+    const licenseNumber = String(fd.get("license_number") ?? "").trim();
+    if (!fullName) {
+      toast.error("Le nom complet est requis");
+      return;
+    }
+    if (!profession) {
+      toast.error("La profession est requise");
+      return;
+    }
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
+    const { data: signUpData, error } = await supabase.auth.signUp({
       ...parsed.data,
       options: {
         emailRedirectTo: `${window.location.origin}/dashboard`,
         data: { full_name: fullName },
       },
     });
-    setLoading(false);
     if (error) {
+      setLoading(false);
       toast.error(error.message);
       return;
     }
+    // Save profession + license immediately (user session exists since email confirm is disabled)
+    if (signUpData.user) {
+      await supabase
+        .from("profiles")
+        .update({
+          full_name: fullName,
+          profession: profession as Profession,
+          license_number: licenseNumber || null,
+        })
+        .eq("id", signUpData.user.id);
+      // Sign out so user must explicitly log in (and hits the pending gate)
+      await supabase.auth.signOut();
+    }
+    setLoading(false);
     toast.success(
       "Compte créé ! Un administrateur doit approuver votre accès avant que vous puissiez utiliser ConseilSV. Vous pouvez vous connecter, mais l'accès au tableau de bord sera bloqué en attendant l'approbation.",
       { duration: 8000 }
@@ -156,16 +190,33 @@ function SignUpForm({ onDone }: { onDone: () => void }) {
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="signup-name">Nom complet</Label>
-        <Input id="signup-name" name="full_name" autoComplete="name" />
+        <Label htmlFor="signup-name">Nom complet *</Label>
+        <Input id="signup-name" name="full_name" autoComplete="name" required maxLength={100} />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="signup-email">Courriel</Label>
+        <Label htmlFor="signup-email">Courriel *</Label>
         <Input id="signup-email" name="email" type="email" autoComplete="email" required />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="signup-password">Mot de passe</Label>
+        <Label htmlFor="signup-password">Mot de passe *</Label>
         <Input id="signup-password" name="password" type="password" autoComplete="new-password" required />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="signup-profession">Profession *</Label>
+        <Select value={profession} onValueChange={(v) => setProfession(v as Profession)}>
+          <SelectTrigger id="signup-profession">
+            <SelectValue placeholder="Sélectionnez..." />
+          </SelectTrigger>
+          <SelectContent>
+            {PROFESSIONS.map((p) => (
+              <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="signup-license">Numéro de licence professionnelle</Label>
+        <Input id="signup-license" name="license_number" maxLength={50} placeholder="Optionnel" />
       </div>
       <Button type="submit" className="w-full bg-gradient-brand text-primary-foreground hover:opacity-90" disabled={loading}>
         {loading && <Loader2 className="size-4 animate-spin" />} Créer mon compte
