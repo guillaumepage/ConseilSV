@@ -6,9 +6,19 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Logo } from "@/components/Logo";
 import { Loader2 } from "lucide-react";
+
+type Profession = "medecin" | "pharmacien" | "infirmiere" | "etudiant" | "autre";
+const PROFESSIONS: { value: Profession; label: string }[] = [
+  { value: "medecin", label: "Médecin" },
+  { value: "pharmacien", label: "Pharmacien(ne)" },
+  { value: "infirmiere", label: "Infirmier(ère)" },
+  { value: "etudiant", label: "Étudiant(e)" },
+  { value: "autre", label: "Autre" },
+];
 
 const searchSchema = z.object({ mode: z.enum(["signin", "signup"]).optional() });
 
