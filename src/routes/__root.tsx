@@ -112,10 +112,25 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorComponent,
 });
 
+const SESSION_PURGE_SCRIPT = `
+try {
+  if (!sessionStorage.getItem('csv_tab_active')) {
+    for (var i = localStorage.length - 1; i >= 0; i--) {
+      var k = localStorage.key(i);
+      if (k && (k.indexOf('sb-') === 0 || k.indexOf('supabase.') === 0)) {
+        localStorage.removeItem(k);
+      }
+    }
+  }
+  sessionStorage.setItem('csv_tab_active', '1');
+} catch (e) {}
+`;
+
 function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="fr">
       <head>
+        <script dangerouslySetInnerHTML={{ __html: SESSION_PURGE_SCRIPT }} />
         <HeadContent />
       </head>
       <body>
