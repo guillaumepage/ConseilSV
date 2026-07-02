@@ -124,53 +124,56 @@ function Dashboard() {
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {resources.map((r) => {
+          const logo = "logo" in r ? r.logo : undefined;
           const content = (
             <>
               <div className="flex items-start justify-between">
                 <div className={`inline-flex size-12 items-center justify-center rounded-xl text-primary-foreground shadow-glow ${r.iconClass}`}>
-                  {r.logo ? (
-                    <img src={r.logo} alt="" className="size-10 rounded-lg border-[6px] border-card bg-card object-contain p-1" />
+                  {logo ? (
+                    <img src={logo} alt="" className="size-10 rounded-lg border-[6px] border-card bg-card object-contain p-1" />
                   ) : r.icon ? (
                     <r.icon className="size-6" />
                   ) : null}
                 </div>
-                {r.kind === "external" ? (
-                  <ExternalLink className="size-4 text-muted-foreground transition-colors group-hover:text-primary" />
-                ) : (
+                {r.kind === "toggle" ? (
                   <FileText className="size-4 text-muted-foreground transition-colors group-hover:text-primary" />
+                ) : (
+                  <ExternalLink className="size-4 text-muted-foreground transition-colors group-hover:text-primary" />
                 )}
               </div>
               <span className="mt-4 text-xs font-medium uppercase tracking-wider text-primary">{r.badge}</span>
               <h2 className="mt-1 text-xl font-semibold">{r.title}</h2>
               <p className="mt-2 flex-1 text-sm text-muted-foreground">{r.desc}</p>
               <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary">
-                {r.kind === "external" ? <>Ouvrir <ExternalLink className="size-3.5" /></> : <>Voir les documents <FileText className="size-3.5" /></>}
+                {r.kind === "toggle" ? <>Voir les documents <FileText className="size-3.5" /></> : <>Ouvrir <ExternalLink className="size-3.5" /></>}
               </span>
             </>
           );
 
-          return r.kind === "external" ? (
-            <a
-              key={r.title}
-              href={r.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group flex flex-col rounded-2xl glass-card p-6 text-left transition-all hover:-translate-y-1 hover:shadow-elegant"
-            >
-              {content}
-            </a>
-          ) : (
-            <button
-              key={r.title}
-              type="button"
-              onClick={() => toggle(r.toggle)}
-              className="group flex flex-col rounded-2xl glass-card p-6 text-left transition-all hover:-translate-y-1 hover:shadow-elegant"
-            >
+          const cardClass = "group flex flex-col rounded-2xl glass-card p-6 text-left transition-all hover:-translate-y-1 hover:shadow-elegant";
+
+          if (r.kind === "external") {
+            return (
+              <a key={r.title} href={r.href} target="_blank" rel="noopener noreferrer" className={cardClass}>
+                {content}
+              </a>
+            );
+          }
+          if (r.kind === "vaccicheck") {
+            return (
+              <button key={r.title} type="button" onClick={openVacciCheck} disabled={openingVC} className={cardClass}>
+                {content}
+              </button>
+            );
+          }
+          return (
+            <button key={r.title} type="button" onClick={() => toggle(r.toggle)} className={cardClass}>
               {content}
             </button>
           );
         })}
       </div>
+
 
       {openSection === "rx" && (
         <FormsSection
