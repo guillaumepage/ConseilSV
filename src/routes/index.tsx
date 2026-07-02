@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Plane, BookOpen, ArrowRight, FileText, ShieldCheck, Stethoscope, GitBranch, Syringe, Pill, Globe } from "lucide-react";
+import { Plane, BookOpen, ArrowRight, Compass, FileText, HeartPulse, MapPin, ShieldCheck, Stethoscope, GitBranch, Syringe, Pill, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
 
@@ -53,6 +53,24 @@ const publicResources = [
     text: "Recommandations santé voyage par destination des CDC.",
     icon: Globe,
     iconClass: "bg-gradient-cdc",
+  },
+  {
+    title: "Voyage.gc.ca",
+    text: "Conseils aux voyageurs du gouvernement du Canada.",
+    icon: MapPin,
+    iconClass: "bg-gradient-canada",
+  },
+  {
+    title: "OMS Travel Advice",
+    text: "Conseils aux voyageurs de l'Organisation mondiale de la Santé.",
+    icon: HeartPulse,
+    iconClass: "bg-gradient-oms",
+  },
+  {
+    title: "NaTHNaC",
+    text: "Recommandations santé voyage par pays (Royaume-Uni).",
+    icon: Compass,
+    iconClass: "bg-gradient-nathnac",
   },
   {
     title: "Registre de vaccination",
