@@ -30,6 +30,7 @@ import grossessePdf from "@/assets/voyager-grossesse.pdf.asset.json";
 import decalagePdf from "@/assets/le-decalage-horaire.pdf.asset.json";
 import planificationPdf from "@/assets/planification-voyage-prudence-sante.pdf.asset.json";
 import avionPdf from "@/assets/le-transport-en-avion.pdf.asset.json";
+import feuilletsCombinesPdf from "@/assets/feuillets-essentiels-combines.pdf.asset.json";
 import appsqPaludismePdf from "@/assets/appsq-prophylaxie-paludisme.pdf.asset.json";
 import appsqDiarrheePdf from "@/assets/appsq-diarrhee-voyageur.pdf.asset.json";
 import appsqMontagnesPdf from "@/assets/appsq-mal-aigu-montagnes.pdf.asset.json";
@@ -69,6 +70,7 @@ const resources: readonly Resource[] = [
 ];
 
 const rxForms = [
+  { title: "Feuillets essentiels (combiné imprimable)", asset: cdn(feuilletsCombinesPdf.url), icon: ClipboardList },
   { title: "Diarrhée du voyage", asset: cdn(diarrheePdf.url), icon: Toilet },
   { title: "Échelle du Lac Louise", asset: cdn(altitudeScalePdf.url), icon: Ruler },
   { title: "Les piqûres d'insectes", asset: cdn(insectesPdf.url), icon: Bug },
