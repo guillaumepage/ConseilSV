@@ -68,6 +68,7 @@ const resources: readonly Resource[] = [
   { kind: "external", href: "https://voyage.gc.ca/", title: "Gouvernement du Canada — Voyage et tourisme", desc: "Conseils aux voyageurs et avertissements du gouvernement du Canada.", icon: MapPin, badge: "Canada", iconClass: "bg-gradient-canada" },
   { kind: "external", href: "https://www.who.int/travel-advice", title: "OMS — Travel Advice", desc: "Conseils aux voyageurs de l'Organisation mondiale de la Santé.", icon: HeartPulse, badge: "International", iconClass: "bg-gradient-oms" },
   { kind: "external", href: "https://travelhealthpro.org.uk/countries", title: "NaTHNaC — TravelHealthPro", desc: "Recommandations santé voyage par pays (Royaume-Uni).", icon: Compass, badge: "Royaume-Uni", iconClass: "bg-gradient-nathnac" },
+  { kind: "external", href: "https://www.openevidence.com/", title: "OpenEvidence", desc: "Moteur de recherche médical basé sur les données probantes.", icon: Search, badge: "Recherche clinique", iconClass: "bg-gradient-openevidence" },
   { kind: "toggle", toggle: "appsq", title: "APPSQ", desc: "Outils cliniques de l'APPSQ pour la santé voyage.", icon: Stethoscope, badge: "Formulaires PDF", iconClass: "bg-gradient-appsq" },
   { kind: "toggle", toggle: "abcpq", title: "ABCPQ", desc: "Algorithmes d'aide à la décision de l'ABCPQ.", icon: GitBranch, badge: "Algorithmes", iconClass: "bg-gradient-abcpq" },
 ];
