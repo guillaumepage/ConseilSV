@@ -171,6 +171,8 @@ function Dashboard() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {resources.map((r) => {
           const logo = "logo" in r ? r.logo : undefined;
+          const isVC = r.kind === "vaccicheck";
+          const locked = isVC && !hasVacciCheckAccess;
           const content = (
             <>
               <div className="flex items-start justify-between">
@@ -181,7 +183,13 @@ function Dashboard() {
                     <r.icon className="size-6" />
                   ) : null}
                 </div>
-                {r.kind === "toggle" ? (
+                {isVC ? (
+                  locked ? (
+                    <Lock className="size-4 text-muted-foreground" aria-label="Verrouillé" />
+                  ) : (
+                    <LockOpen className="size-4 text-primary" aria-label="Déverrouillé" />
+                  )
+                ) : r.kind === "toggle" ? (
                   <FileText className="size-4 text-muted-foreground transition-colors group-hover:text-primary" />
                 ) : (
                   <ExternalLink className="size-4 text-muted-foreground transition-colors group-hover:text-primary" />
@@ -191,12 +199,22 @@ function Dashboard() {
               <h2 className="mt-1 text-xl font-semibold">{r.title}</h2>
               <p className="mt-2 flex-1 text-sm text-muted-foreground">{r.desc}</p>
               <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary">
-                {r.kind === "toggle" ? <>Voir les documents <FileText className="size-3.5" /></> : <>Ouvrir <ExternalLink className="size-3.5" /></>}
+                {isVC ? (
+                  locked ? (
+                    <>Abonnement payant requis <Lock className="size-3.5" /></>
+                  ) : (
+                    <>Ouvrir <LockOpen className="size-3.5" /></>
+                  )
+                ) : r.kind === "toggle" ? (
+                  <>Voir les documents <FileText className="size-3.5" /></>
+                ) : (
+                  <>Ouvrir <ExternalLink className="size-3.5" /></>
+                )}
               </span>
             </>
           );
 
-          const cardClass = "group flex flex-col rounded-2xl glass-card p-6 text-left transition-all hover:-translate-y-1 hover:shadow-elegant";
+          const cardClass = `group flex flex-col rounded-2xl glass-card p-6 text-left transition-all hover:-translate-y-1 hover:shadow-elegant ${locked ? "opacity-70" : ""}`;
 
           if (r.kind === "external") {
             return (
@@ -207,7 +225,19 @@ function Dashboard() {
           }
           if (r.kind === "vaccicheck") {
             return (
-              <button key={r.title} type="button" onClick={openVacciCheck} disabled={openingVC} className={cardClass}>
+              <button
+                key={r.title}
+                type="button"
+                onClick={() => {
+                  if (locked) {
+                    toast.error("VacciCheck est réservé aux abonnés payants ConseilSV.");
+                    return;
+                  }
+                  openVacciCheck();
+                }}
+                disabled={openingVC}
+                className={cardClass}
+              >
                 {content}
               </button>
             );
