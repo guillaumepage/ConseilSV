@@ -3,7 +3,9 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { issueVacciCheckToken } from "@/lib/vaccicheck.functions";
-import { Activity, Baby, Bug, Car, ClipboardList, Clock, Download, ExternalLink, FileText, GitBranch, Globe, Luggage, Mountain, Pill, Plane, BookOpen, Ruler, ShieldCheck, Stethoscope, Sun, Syringe, Toilet } from "lucide-react";
+import { Activity, Baby, Bug, Car, ClipboardList, Clock, Download, ExternalLink, FileText, GitBranch, Globe, Lock, LockOpen, Luggage, Mountain, Pill, Plane, BookOpen, Ruler, ShieldCheck, Stethoscope, Sun, Syringe, Toilet } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { getMyAdminStatus } from "@/lib/admin.functions";
 import diarrheePdf from "@/assets/diarrhee-du-voyage.pdf.asset.json";
 import altitudeScalePdf from "@/assets/echelle-du-lac-louise.pdf.asset.json";
 import insectesPdf from "@/assets/les-piqures-d-insectes.pdf.asset.json";
@@ -56,7 +58,7 @@ type Resource =
   | { kind: "toggle"; toggle: "rx" | "appsq" | "abcpq"; title: string; desc: string; badge: string; iconClass: string; logo?: string; icon?: React.ComponentType<{ className?: string }> };
 
 const resources: readonly Resource[] = [
-  { kind: "vaccicheck", title: "VacciCheck", desc: "Votre outil d'aide à la décision vaccinale. Accès complet à l'application.", icon: Syringe, badge: "Application principale", iconClass: "bg-gradient-vaccicheck" },
+  { kind: "vaccicheck", title: "VacciCheck", desc: "Outil d'aide à la décision vaccinale. Réservé aux abonnés payants ConseilSV.", icon: Syringe, badge: "Abonnement payant", iconClass: "bg-gradient-vaccicheck" },
   { kind: "toggle", toggle: "rx", title: "RxVigilance", desc: "Formulaires PDF pratiques pour vos conseils aux voyageurs.", icon: Pill, badge: "Formulaires PDF", iconClass: "bg-gradient-rx" },
   { kind: "external", href: "https://msss.gouv.qc.ca/professionnels/vaccination/piq-vaccins/", title: "PIQ — Protocole d'immunisation", desc: "Protocole d'immunisation du Québec, ministère de la Santé.", icon: BookOpen, badge: "MSSS", iconClass: "bg-gradient-piq" },
   { kind: "external", href: "https://gia.sx5.rtss.qc.ca/auth/realms/msss/protocol/openid-connect/auth?client_id=faiwprod&redirect_uri=https%3A%2F%2Ffaius.santepublique.rtss.qc.ca&response_type=code&scope=openid%20email%20profile&nonce=74ba413b4089a0f1b99b1de04216720f0fVaVaQGG&state=8ef95d3fbad184deb52d5a98b3d96ab473y0fXrQM&code_challenge=R5uKjlnWB_SQ6Uz5HLgSOA-O2KhqZCO2avBJ-Ac0rQk&code_challenge_method=S256", title: "Registre de vaccination", desc: "Registre de vaccination du Québec — accès professionnel sécurisé.", icon: ShieldCheck, badge: "Québec", iconClass: "bg-gradient-registre" },
@@ -109,6 +111,13 @@ function Dashboard() {
   const [openSection, setOpenSection] = useState<null | "rx" | "appsq" | "abcpq">(null);
   const [openingVC, setOpeningVC] = useState(false);
   const issueToken = useServerFn(issueVacciCheckToken);
+  const fetchAccess = useServerFn(getMyAdminStatus);
+  const { data: access } = useQuery({
+    queryKey: ["my-access"],
+    queryFn: () => fetchAccess(),
+    staleTime: 60_000,
+  });
+  const hasVacciCheckAccess = !!access?.hasVacciCheckAccess;
 
   const toggle = (key: "rx" | "appsq" | "abcpq") =>
     setOpenSection((prev) => (prev === key ? null : key));
@@ -162,6 +171,8 @@ function Dashboard() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {resources.map((r) => {
           const logo = "logo" in r ? r.logo : undefined;
+          const isVC = r.kind === "vaccicheck";
+          const locked = isVC && !hasVacciCheckAccess;
           const content = (
             <>
               <div className="flex items-start justify-between">
@@ -172,7 +183,13 @@ function Dashboard() {
                     <r.icon className="size-6" />
                   ) : null}
                 </div>
-                {r.kind === "toggle" ? (
+                {isVC ? (
+                  locked ? (
+                    <Lock className="size-4 text-muted-foreground" aria-label="Verrouillé" />
+                  ) : (
+                    <LockOpen className="size-4 text-primary" aria-label="Déverrouillé" />
+                  )
+                ) : r.kind === "toggle" ? (
                   <FileText className="size-4 text-muted-foreground transition-colors group-hover:text-primary" />
                 ) : (
                   <ExternalLink className="size-4 text-muted-foreground transition-colors group-hover:text-primary" />
@@ -182,12 +199,22 @@ function Dashboard() {
               <h2 className="mt-1 text-xl font-semibold">{r.title}</h2>
               <p className="mt-2 flex-1 text-sm text-muted-foreground">{r.desc}</p>
               <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary">
-                {r.kind === "toggle" ? <>Voir les documents <FileText className="size-3.5" /></> : <>Ouvrir <ExternalLink className="size-3.5" /></>}
+                {isVC ? (
+                  locked ? (
+                    <>Abonnement payant requis <Lock className="size-3.5" /></>
+                  ) : (
+                    <>Ouvrir <LockOpen className="size-3.5" /></>
+                  )
+                ) : r.kind === "toggle" ? (
+                  <>Voir les documents <FileText className="size-3.5" /></>
+                ) : (
+                  <>Ouvrir <ExternalLink className="size-3.5" /></>
+                )}
               </span>
             </>
           );
 
-          const cardClass = "group flex flex-col rounded-2xl glass-card p-6 text-left transition-all hover:-translate-y-1 hover:shadow-elegant";
+          const cardClass = `group flex flex-col rounded-2xl glass-card p-6 text-left transition-all hover:-translate-y-1 hover:shadow-elegant ${locked ? "opacity-70" : ""}`;
 
           if (r.kind === "external") {
             return (
@@ -198,7 +225,19 @@ function Dashboard() {
           }
           if (r.kind === "vaccicheck") {
             return (
-              <button key={r.title} type="button" onClick={openVacciCheck} disabled={openingVC} className={cardClass}>
+              <button
+                key={r.title}
+                type="button"
+                onClick={() => {
+                  if (locked) {
+                    toast.error("VacciCheck est réservé aux abonnés payants ConseilSV.");
+                    return;
+                  }
+                  openVacciCheck();
+                }}
+                disabled={openingVC}
+                className={cardClass}
+              >
                 {content}
               </button>
             );
