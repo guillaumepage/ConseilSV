@@ -107,9 +107,31 @@ const abcpqAlgos = [
 
 function Dashboard() {
   const [openSection, setOpenSection] = useState<null | "rx" | "appsq" | "abcpq">(null);
+  const [openingVC, setOpeningVC] = useState(false);
+  const issueToken = useServerFn(issueVacciCheckToken);
 
   const toggle = (key: "rx" | "appsq" | "abcpq") =>
     setOpenSection((prev) => (prev === key ? null : key));
+
+  const openVacciCheck = async () => {
+    if (openingVC) return;
+    setOpeningVC(true);
+    // Open a blank tab synchronously so pop-up blockers don't fire.
+    const win = window.open("about:blank", "_blank", "noopener");
+    try {
+      const { token } = await issueToken();
+      const url = `https://vaccicheckapp.netlify.app/?vct=${encodeURIComponent(token)}`;
+      if (win) win.location.href = url;
+      else window.location.href = url;
+    } catch (err) {
+      if (win) win.close();
+      toast.error("Impossible d'ouvrir VacciCheck. Réessayez.");
+      console.error(err);
+    } finally {
+      setOpeningVC(false);
+    }
+  };
+
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-10">
