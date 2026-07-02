@@ -55,6 +55,24 @@ const publicResources = [
     iconClass: "bg-gradient-cdc",
   },
   {
+    title: "Voyage.gc.ca",
+    text: "Conseils aux voyageurs du gouvernement du Canada.",
+    icon: MapPin,
+    iconClass: "bg-gradient-canada",
+  },
+  {
+    title: "OMS Travel Advice",
+    text: "Conseils aux voyageurs de l'Organisation mondiale de la Santé.",
+    icon: HeartPulse,
+    iconClass: "bg-gradient-oms",
+  },
+  {
+    title: "NaTHNaC",
+    text: "Recommandations santé voyage par pays (Royaume-Uni).",
+    icon: Compass,
+    iconClass: "bg-gradient-nathnac",
+  },
+  {
     title: "Registre de vaccination",
     text: "Accès direct au Registre de vaccination du Québec.",
     icon: ShieldCheck,
