@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Plane, BookOpen, ArrowRight, FileText, ShieldCheck, Stethoscope, GitBranch, Syringe, Pill, Globe } from "lucide-react";
+import { Plane, BookOpen, ArrowRight, Compass, FileText, HeartPulse, MapPin, ShieldCheck, Stethoscope, GitBranch, Syringe, Pill, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
 
