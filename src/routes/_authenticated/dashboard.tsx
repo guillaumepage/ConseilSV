@@ -70,6 +70,7 @@ const resources: readonly Resource[] = [
 ];
 
 const rxForms = [
+  { title: "Feuillets essentiels (combiné imprimable)", asset: cdn(feuilletsCombinesPdf.url), icon: ClipboardList },
   { title: "Diarrhée du voyage", asset: cdn(diarrheePdf.url), icon: Toilet },
   { title: "Échelle du Lac Louise", asset: cdn(altitudeScalePdf.url), icon: Ruler },
   { title: "Les piqûres d'insectes", asset: cdn(insectesPdf.url), icon: Bug },
