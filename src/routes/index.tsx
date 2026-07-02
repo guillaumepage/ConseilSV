@@ -73,6 +73,12 @@ const publicResources = [
     iconClass: "bg-gradient-nathnac",
   },
   {
+    title: "OpenEvidence",
+    text: "Moteur de recherche médical basé sur les données probantes.",
+    icon: Search,
+    iconClass: "bg-gradient-openevidence",
+  },
+  {
     title: "Registre de vaccination",
     text: "Accès direct au Registre de vaccination du Québec.",
     icon: ShieldCheck,
