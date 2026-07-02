@@ -1,5 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
+import { issueVacciCheckToken } from "@/lib/vaccicheck.functions";
 import { Activity, Baby, Bug, Car, ClipboardList, Clock, Download, ExternalLink, FileText, GitBranch, Globe, Luggage, Mountain, Pill, Plane, BookOpen, Ruler, ShieldCheck, Stethoscope, Sun, Syringe, Toilet } from "lucide-react";
 import diarrheePdf from "@/assets/diarrhee-du-voyage.pdf.asset.json";
 import altitudeScalePdf from "@/assets/echelle-du-lac-louise.pdf.asset.json";
@@ -49,10 +52,11 @@ const cdn = (path: string) => (path.startsWith("http") ? path : `${ASSET_CDN}${p
 
 type Resource =
   | { kind: "external"; href: string; title: string; desc: string; badge: string; iconClass: string; logo?: string; icon?: React.ComponentType<{ className?: string }> }
+  | { kind: "vaccicheck"; title: string; desc: string; badge: string; iconClass: string; icon: React.ComponentType<{ className?: string }> }
   | { kind: "toggle"; toggle: "rx" | "appsq" | "abcpq"; title: string; desc: string; badge: string; iconClass: string; logo?: string; icon?: React.ComponentType<{ className?: string }> };
 
 const resources: readonly Resource[] = [
-  { kind: "external", href: "https://vaccicheckapp.netlify.app/", title: "VacciCheck", desc: "Votre outil d'aide à la décision vaccinale. Accès complet à l'application.", icon: Syringe, badge: "Application principale", iconClass: "bg-gradient-vaccicheck" },
+  { kind: "vaccicheck", title: "VacciCheck", desc: "Votre outil d'aide à la décision vaccinale. Accès complet à l'application.", icon: Syringe, badge: "Application principale", iconClass: "bg-gradient-vaccicheck" },
   { kind: "toggle", toggle: "rx", title: "RxVigilance", desc: "Formulaires PDF pratiques pour vos conseils aux voyageurs.", icon: Pill, badge: "Formulaires PDF", iconClass: "bg-gradient-rx" },
   { kind: "external", href: "https://msss.gouv.qc.ca/professionnels/vaccination/piq-vaccins/", title: "PIQ — Protocole d'immunisation", desc: "Protocole d'immunisation du Québec, ministère de la Santé.", icon: BookOpen, badge: "MSSS", iconClass: "bg-gradient-piq" },
   { kind: "external", href: "https://gia.sx5.rtss.qc.ca/auth/realms/msss/protocol/openid-connect/auth?client_id=faiwprod&redirect_uri=https%3A%2F%2Ffaius.santepublique.rtss.qc.ca&response_type=code&scope=openid%20email%20profile&nonce=74ba413b4089a0f1b99b1de04216720f0fVaVaQGG&state=8ef95d3fbad184deb52d5a98b3d96ab473y0fXrQM&code_challenge=R5uKjlnWB_SQ6Uz5HLgSOA-O2KhqZCO2avBJ-Ac0rQk&code_challenge_method=S256", title: "Registre de vaccination", desc: "Registre de vaccination du Québec — accès professionnel sécurisé.", icon: ShieldCheck, badge: "Québec", iconClass: "bg-gradient-registre" },
@@ -103,9 +107,31 @@ const abcpqAlgos = [
 
 function Dashboard() {
   const [openSection, setOpenSection] = useState<null | "rx" | "appsq" | "abcpq">(null);
+  const [openingVC, setOpeningVC] = useState(false);
+  const issueToken = useServerFn(issueVacciCheckToken);
 
   const toggle = (key: "rx" | "appsq" | "abcpq") =>
     setOpenSection((prev) => (prev === key ? null : key));
+
+  const openVacciCheck = async () => {
+    if (openingVC) return;
+    setOpeningVC(true);
+    // Open a blank tab synchronously so pop-up blockers don't fire.
+    const win = window.open("about:blank", "_blank", "noopener");
+    try {
+      const { token } = await issueToken();
+      const url = `https://vaccicheckapp.netlify.app/?vct=${encodeURIComponent(token)}`;
+      if (win) win.location.href = url;
+      else window.location.href = url;
+    } catch (err) {
+      if (win) win.close();
+      toast.error("Impossible d'ouvrir VacciCheck. Réessayez.");
+      console.error(err);
+    } finally {
+      setOpeningVC(false);
+    }
+  };
+
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-10">
@@ -120,53 +146,56 @@ function Dashboard() {
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {resources.map((r) => {
+          const logo = "logo" in r ? r.logo : undefined;
           const content = (
             <>
               <div className="flex items-start justify-between">
                 <div className={`inline-flex size-12 items-center justify-center rounded-xl text-primary-foreground shadow-glow ${r.iconClass}`}>
-                  {r.logo ? (
-                    <img src={r.logo} alt="" className="size-10 rounded-lg border-[6px] border-card bg-card object-contain p-1" />
+                  {logo ? (
+                    <img src={logo} alt="" className="size-10 rounded-lg border-[6px] border-card bg-card object-contain p-1" />
                   ) : r.icon ? (
                     <r.icon className="size-6" />
                   ) : null}
                 </div>
-                {r.kind === "external" ? (
-                  <ExternalLink className="size-4 text-muted-foreground transition-colors group-hover:text-primary" />
-                ) : (
+                {r.kind === "toggle" ? (
                   <FileText className="size-4 text-muted-foreground transition-colors group-hover:text-primary" />
+                ) : (
+                  <ExternalLink className="size-4 text-muted-foreground transition-colors group-hover:text-primary" />
                 )}
               </div>
               <span className="mt-4 text-xs font-medium uppercase tracking-wider text-primary">{r.badge}</span>
               <h2 className="mt-1 text-xl font-semibold">{r.title}</h2>
               <p className="mt-2 flex-1 text-sm text-muted-foreground">{r.desc}</p>
               <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary">
-                {r.kind === "external" ? <>Ouvrir <ExternalLink className="size-3.5" /></> : <>Voir les documents <FileText className="size-3.5" /></>}
+                {r.kind === "toggle" ? <>Voir les documents <FileText className="size-3.5" /></> : <>Ouvrir <ExternalLink className="size-3.5" /></>}
               </span>
             </>
           );
 
-          return r.kind === "external" ? (
-            <a
-              key={r.title}
-              href={r.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group flex flex-col rounded-2xl glass-card p-6 text-left transition-all hover:-translate-y-1 hover:shadow-elegant"
-            >
-              {content}
-            </a>
-          ) : (
-            <button
-              key={r.title}
-              type="button"
-              onClick={() => toggle(r.toggle)}
-              className="group flex flex-col rounded-2xl glass-card p-6 text-left transition-all hover:-translate-y-1 hover:shadow-elegant"
-            >
+          const cardClass = "group flex flex-col rounded-2xl glass-card p-6 text-left transition-all hover:-translate-y-1 hover:shadow-elegant";
+
+          if (r.kind === "external") {
+            return (
+              <a key={r.title} href={r.href} target="_blank" rel="noopener noreferrer" className={cardClass}>
+                {content}
+              </a>
+            );
+          }
+          if (r.kind === "vaccicheck") {
+            return (
+              <button key={r.title} type="button" onClick={openVacciCheck} disabled={openingVC} className={cardClass}>
+                {content}
+              </button>
+            );
+          }
+          return (
+            <button key={r.title} type="button" onClick={() => toggle(r.toggle)} className={cardClass}>
               {content}
             </button>
           );
         })}
       </div>
+
 
       {openSection === "rx" && (
         <FormsSection
