@@ -194,6 +194,15 @@
 @utility bg-gradient-cdc {
   background-image: var(--gradient-cdc);
 }
+@utility bg-gradient-canada {
+  background-image: var(--gradient-canada);
+}
+@utility bg-gradient-oms {
+  background-image: var(--gradient-oms);
+}
+@utility bg-gradient-nathnac {
+  background-image: var(--gradient-nathnac);
+}
 @utility glass-card {
   background-color: color-mix(in oklab, var(--card) 80%, transparent);
   backdrop-filter: blur(12px);
