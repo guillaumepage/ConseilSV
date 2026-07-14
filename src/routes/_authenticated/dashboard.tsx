@@ -142,7 +142,70 @@ function Dashboard() {
     }
 
     win.document.title = "Ouverture de VacciCheck…";
-    win.document.body.innerHTML = '<p style="font-family:system-ui;margin:24px;color:#334155">Ouverture de VacciCheck…</p>';
+    win.document.documentElement.lang = "fr";
+    win.document.head.innerHTML = `
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width,initial-scale=1" />
+      <title>Ouverture de VacciCheck…</title>
+      <style>
+        *,*::before,*::after{box-sizing:border-box}
+        html,body{margin:0;height:100%}
+        body{
+          font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,sans-serif;
+          color:#e6ebff;
+          background:
+            radial-gradient(1200px 600px at 15% 10%, rgba(99,102,241,.35), transparent 60%),
+            radial-gradient(900px 500px at 85% 90%, rgba(56,189,248,.30), transparent 60%),
+            linear-gradient(135deg,#0b1024 0%,#111a3a 55%,#1b2450 100%);
+          display:flex;align-items:center;justify-content:center;
+          overflow:hidden;
+        }
+        .card{
+          position:relative;
+          padding:44px 52px;
+          border-radius:24px;
+          background:rgba(255,255,255,.06);
+          border:1px solid rgba(255,255,255,.12);
+          backdrop-filter:blur(18px);
+          -webkit-backdrop-filter:blur(18px);
+          box-shadow:0 30px 80px -20px rgba(8,12,40,.6);
+          text-align:center;
+          max-width:420px;
+          animation:fadeUp .6s ease-out both;
+        }
+        .badge{
+          display:inline-flex;align-items:center;gap:8px;
+          padding:6px 14px;border-radius:999px;
+          background:rgba(129,140,248,.18);
+          border:1px solid rgba(129,140,248,.35);
+          color:#c7d2fe;font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;
+        }
+        .badge::before{content:"";width:6px;height:6px;border-radius:999px;background:#a5b4fc;box-shadow:0 0 12px #a5b4fc;animation:pulse 1.4s ease-in-out infinite}
+        h1{margin:22px 0 8px;font-size:26px;font-weight:700;letter-spacing:-.01em}
+        p{margin:0;color:#b6c0e0;font-size:14.5px;line-height:1.55}
+        .spinner{
+          margin:28px auto 4px;width:52px;height:52px;border-radius:50%;
+          background:conic-gradient(from 0deg,rgba(165,180,252,0) 0deg,#a5b4fc 300deg,rgba(165,180,252,0) 360deg);
+          mask:radial-gradient(circle 18px at center,transparent 98%,#000 100%);
+          -webkit-mask:radial-gradient(circle 18px at center,transparent 98%,#000 100%);
+          animation:spin 1.1s linear infinite;
+        }
+        .dots{display:inline-block;width:1.2em;text-align:left}
+        .dots::after{content:"";animation:dots 1.4s steps(4,end) infinite}
+        @keyframes dots{0%{content:""}25%{content:"."}50%{content:".."}75%{content:"..."}100%{content:""}}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+      </style>
+    `;
+    win.document.body.innerHTML = `
+      <div class="card" role="status" aria-live="polite">
+        <span class="badge">ConseilSV → VacciCheck</span>
+        <div class="spinner" aria-hidden="true"></div>
+        <h1>Ouverture de VacciCheck</h1>
+        <p>Authentification sécurisée en cours<span class="dots"></span></p>
+      </div>
+    `;
     try {
       const { token } = await issueToken();
       const url = `https://vaccicheckapp.netlify.app/?vct=${encodeURIComponent(token)}`;
